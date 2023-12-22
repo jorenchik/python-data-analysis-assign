@@ -3,14 +3,12 @@ import pathlib
 import matplotlib.pyplot as plt
 import data_utils
 import re
-import math
 from enum import Enum
 
 # Data related
 DATA_PATH = pathlib.Path("./data")
 AVERAGE_TEMPERATURE_FILE = DATA_PATH.joinpath("gaisaTemperatura2022.xlsx")
 CHART_TITLE = "Gaisa temperatūra Rīgā četros gadalaikos"
-# X_LABEL = ""
 Y_LABEL = "Gaisa temperatūra (Celsija grādi)"
 X_LABEL_INDEX = 0
 Y_LABEL_INDEX = 0
@@ -41,34 +39,8 @@ CHART_SAVE_PATH = pathlib.Path(CHART_FILENAME)
 # BAR_WIDTH = 0.8
 PX = 1 / plt.rcParams['figure.dpi']
 FIG_SIZE = (1200 * PX, 1200 * PX)
-
-spreadsheet = data_utils.get_work_sheet_by_index(AVERAGE_TEMPERATURE_FILE,
-                                                 index=0)
-data_arr = data_utils.array_from_sheet(spreadsheet, X_LABEL_INDEX,
-                                       Y_LABEL_INDEX)
-y_labels = data_utils.get_y_labels(spreadsheet, X_LABEL_INDEX, Y_LABEL_INDEX)
-season_day_count = {item.name: 0 for item in SEASONS}
-total_day_count = len(y_labels)
-
-for label in y_labels:
-    month_num_str = re.match(r'\d+\.(\d+)\.\d+', label).group(1)
-    month_num_str = re.sub(r'^0+', '', month_num_str)
-    month_num = int(month_num_str)
-    season_num = MONTHS_TO_SEASONS[month_num]
-    season_name = SEASONS(season_num).name
-    season_day_count[season_name] += 1
-
-season_starting_indexes = {
-    item[0]: sum(list(season_day_count.values())[0:i])
-    for i, item in enumerate(season_day_count.items())
-}
-
-# Initalize the array
-
-maximal_length_of_season = max(season_day_count.values())
-season_data = np.array([
-    np.full(maximal_length_of_season, np.nan) for i in range(0, len(SEASONS))
-])
+MAXIMUM_DAYS_IN_A_MONTH = 31
+MONTHS_PER_SEASON = 3
 
 
 def get_index_of_first_less_or_equal(n, list_):
@@ -80,8 +52,43 @@ def get_index_of_first_less_or_equal(n, list_):
     return index_
 
 
-for i, row in enumerate(data_arr):
-    day_average = np.average(row)
-    index_ = get_index_of_first_less_or_equal(
-        i, list(season_starting_indexes.values()))
-    # TODO: complete collection of day averages
+spreadsheet = data_utils.get_work_sheet_by_index(AVERAGE_TEMPERATURE_FILE,
+                                                 index=0)
+data_arr = data_utils.array_from_sheet(spreadsheet, X_LABEL_INDEX,
+                                       Y_LABEL_INDEX)
+y_labels = data_utils.get_y_labels(spreadsheet, X_LABEL_INDEX, Y_LABEL_INDEX)
+
+season_day_count = np.full(len(SEASONS), 0, dtype=np.int_)
+total_day_count = len(y_labels)
+maximal_length_of_season = MAXIMUM_DAYS_IN_A_MONTH * MONTHS_PER_SEASON
+season_daily_averages = [
+    np.full(maximal_length_of_season, np.nan) for i in range(0, len(SEASONS))
+]
+
+for i, label in enumerate(y_labels):
+    month_num_str = re.match(r'\d+\.(\d+)\.\d+', label).group(1)
+    month_num_str = re.sub(r'^0+', '', month_num_str)
+    daily_average = np.average(data_arr[i])
+    month_num = int(month_num_str)
+    season_num = MONTHS_TO_SEASONS[month_num]
+    day_index = season_day_count[season_num]
+    season_daily_averages[season_num][day_index] = daily_average
+    season_day_count[season_num] += 1
+
+fig, ax = plt.subplots(figsize=FIG_SIZE)
+labels = [season.name for season in SEASONS]
+
+for i in range(0, len(season_daily_averages)):
+    arr = season_daily_averages[i]
+    season_daily_averages[i] = arr[~np.isnan(arr)]
+
+bplot1 = ax.boxplot(season_daily_averages,
+                    vert=True,
+                    patch_artist=True,
+                    labels=labels)
+ax.legend(loc="upper right")
+plt.ylabel(Y_LABEL)
+plt.title(CHART_TITLE)
+plt.xticks(rotation=60, ha="right")
+plt.show()
+# plt.savefig(fname=chart_save_path)
