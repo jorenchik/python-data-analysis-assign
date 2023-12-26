@@ -9,6 +9,8 @@ DATA_PATH = pathlib.Path("./data")
 FACTUAL_WIND_SPEED_FILE = DATA_PATH.joinpath("vejaAtrumsFaktiskais.xlsx")
 WINDGUST_SPEED_FILE = DATA_PATH.joinpath("vejaAtrumsBrazmas.xlsx")
 CHART_TITLE = "Vidējais un maksimālais vēja ātrums 2023.gada augustā"
+AVERAGE_SPEED_TITLE = "Vidējais"
+WIND_GUST_TITLE = "Maksimālais"
 X_LABEL = "Mērijumu datums"
 Y_LABEL = "Vēja ātrums (m/s)"
 X_LABEL_INDEX = 0
@@ -53,8 +55,8 @@ if not SAVE_FILE and not SHOW_CHART and not RUN:
 
 # This is where the ax labels are set
 spreadsheet_files = {
-    "Factual speed": FACTUAL_WIND_SPEED_FILE,
-    "Wind gusts": WINDGUST_SPEED_FILE
+    AVERAGE_SPEED_TITLE: FACTUAL_WIND_SPEED_FILE,
+    WIND_GUST_TITLE: WINDGUST_SPEED_FILE
 }
 spreadsheets = {
     key: data_utils.get_work_sheet_by_index(val, index=0)
@@ -65,25 +67,25 @@ data_arrays = {
     for key, val in spreadsheets.items()
 }
 day_averages = np.array(
-    [np.average(arr) for arr in data_arrays["Factual speed"]])
-day_maximums = np.array([np.max(arr) for arr in data_arrays["Wind gusts"]])
+    [np.average(arr) for arr in data_arrays[AVERAGE_SPEED_TITLE]])
+day_maximums = np.array([np.max(arr) for arr in data_arrays[WIND_GUST_TITLE]])
 
 # I assume the spreadheet shape is the same
 array_length = max([len(arr) for arr in data_arrays])
-y_labels = data_utils.get_y_labels(spreadsheets["Factual speed"],
+y_labels = data_utils.get_y_labels(spreadsheets[AVERAGE_SPEED_TITLE],
                                    X_LABEL_INDEX, Y_LABEL_INDEX)
 fig, ax = plt.subplots(figsize=FIG_SIZE)
 bottom_offset = day_averages
 ax.bar(y_labels,
        day_maximums,
        BAR_WIDTH,
-       label="Wind gusts",
+       label=WIND_GUST_TITLE,
        bottom=bottom_offset)
 ax.bar(
     y_labels,
     day_averages,
     BAR_WIDTH,
-    label="Factual speed",
+    label=AVERAGE_SPEED_TITLE,
 )
 
 ax.legend(loc="upper right")
