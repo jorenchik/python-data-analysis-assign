@@ -1,3 +1,7 @@
+"""
+Those are the data utilities (that mainly work with sheets)
+I use in both exercises.
+"""
 import numpy as np
 import openpyxl
 import pathlib
