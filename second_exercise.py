@@ -35,7 +35,6 @@ MONTHS_TO_SEASONS = {
 }
 
 # Matplotlib configuration
-# BAR_WIDTH = 0.8
 PX = 1 / plt.rcParams['figure.dpi']
 FIG_SIZE = (1200 * PX, 1200 * PX)
 MAXIMUM_DAYS_IN_A_MONTH = 31
@@ -43,7 +42,7 @@ MONTHS_PER_SEASON = 3
 
 # Showing or saving mode with CLI arguments
 parser = argparse.ArgumentParser(
-    prog='first_exercise',
+    prog='second_exercise',
     description='Makes a box plot from xlsx file',
 )
 parser.add_argument(
@@ -83,6 +82,7 @@ def get_index_of_first_less_or_equal(n, list_):
     return index_
 
 
+# Parsing the data from spreadheets
 spreadsheet = data_utils.get_work_sheet_by_index(AVERAGE_TEMPERATURE_FILE,
                                                  index=0)
 data_arr = data_utils.array_from_sheet(spreadsheet, X_LABEL_INDEX,
@@ -91,12 +91,13 @@ y_labels = data_utils.get_y_labels(spreadsheet, X_LABEL_INDEX, Y_LABEL_INDEX)
 
 season_day_count = np.full(len(SEASONS), 0, dtype=np.int_)
 total_day_count = len(y_labels)
+# The size of data arrays is the maximum possible month size
 maximal_length_of_season = MAXIMUM_DAYS_IN_A_MONTH * MONTHS_PER_SEASON
 season_daily_averages = [
     np.full(maximal_length_of_season, np.nan) for i in range(0, len(SEASONS))
 ]
-
 for i, label in enumerate(y_labels):
+    # Detect the month from a datetime string
     month_num_str = re.match(r'\d+\.(\d+)\.\d+', label).group(1)
     month_num_str = re.sub(r'^0+', '', month_num_str)
     daily_average = np.average(data_arr[i])
@@ -105,19 +106,19 @@ for i, label in enumerate(y_labels):
     day_index = season_day_count[season_num]
     season_daily_averages[season_num][day_index] = daily_average
     season_day_count[season_num] += 1
-
-fig, ax = plt.subplots(figsize=FIG_SIZE)
-labels = [season.name for season in SEASONS]
-
 for i in range(0, len(season_daily_averages)):
     arr = season_daily_averages[i]
+    # Remove the NaN numbers from the arrays
+    # for correct box plots
     season_daily_averages[i] = arr[~np.isnan(arr)]
 
-bplot1 = ax.boxplot(season_daily_averages,
-                    vert=True,
-                    patch_artist=True,
-                    labels=labels)
-
+# Making the box plot
+fig, ax = plt.subplots(figsize=FIG_SIZE)
+labels = [season.name for season in SEASONS]
+bplot = ax.boxplot(season_daily_averages,
+                   vert=True,
+                   patch_artist=True,
+                   labels=labels)
 ax.legend(loc="upper right")
 plt.ylabel(Y_LABEL)
 plt.title(CHART_TITLE)
