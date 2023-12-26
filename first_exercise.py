@@ -56,30 +56,36 @@ spreadsheet_files = {
     "Factual speed": FACTUAL_WIND_SPEED_FILE,
     "Wind gusts": WINDGUST_SPEED_FILE
 }
-spreadsheets = [
-    data_utils.get_work_sheet_by_index(file, index=0)
-    for file in spreadsheet_files.values()
-]
-data_arrays = [
-    data_utils.array_from_sheet(sheet, X_LABEL_INDEX, Y_LABEL_INDEX)
-    for sheet in spreadsheets
-]
+spreadsheets = {
+    key: data_utils.get_work_sheet_by_index(val, index=0)
+    for key, val in spreadsheet_files.items()
+}
+data_arrays = {
+    key: data_utils.array_from_sheet(val, X_LABEL_INDEX, Y_LABEL_INDEX)
+    for key, val in spreadsheets.items()
+}
+day_averages = np.array(
+    [np.average(arr) for arr in data_arrays["Factual speed"]])
+day_maximums = np.array([np.max(arr) for arr in data_arrays["Wind gusts"]])
 
 # I assume the spreadheet shape is the same
 array_length = max([len(arr) for arr in data_arrays])
-y_labels = data_utils.get_y_labels(spreadsheets[0], X_LABEL_INDEX,
-                                   Y_LABEL_INDEX)
-averages = np.empty(shape=(len(data_arrays), array_length))
-for i, arr in enumerate(data_arrays):
-    row_average_values = np.array(
-        [np.average(row_values) for row_values in arr])
-    averages[i] = row_average_values
-
+y_labels = data_utils.get_y_labels(spreadsheets["Factual speed"],
+                                   X_LABEL_INDEX, Y_LABEL_INDEX)
 fig, ax = plt.subplots(figsize=FIG_SIZE)
-bottom = np.zeros(array_length)
-for title, data in zip(spreadsheet_files.keys(), averages):
-    ax.bar(y_labels, data, BAR_WIDTH, label=title, bottom=bottom)
-    bottom += data
+bottom_offset = day_averages
+ax.bar(y_labels,
+       day_maximums,
+       BAR_WIDTH,
+       label="Wind gusts",
+       bottom=bottom_offset)
+ax.bar(
+    y_labels,
+    day_averages,
+    BAR_WIDTH,
+    label="Factual speed",
+)
+
 ax.legend(loc="upper right")
 plt.xlabel(X_LABEL)
 plt.ylabel(Y_LABEL)
