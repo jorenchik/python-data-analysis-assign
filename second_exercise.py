@@ -121,7 +121,6 @@ bplot1 = ax.boxplot(season_daily_averages,
 ax.legend(loc="upper right")
 plt.ylabel(Y_LABEL)
 plt.title(CHART_TITLE)
-plt.xticks(rotation=60, ha="right")
 if SAVE_FILE:
     plt.savefig(fname=SAVE_FILEPATH)
 if SHOW_CHART:
