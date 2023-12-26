@@ -76,12 +76,12 @@ array_length = max([len(arr) for arr in data_arrays])
 y_labels = data_utils.get_y_labels(spreadsheets[AVERAGE_SPEED_TITLE],
                                    X_LABEL_INDEX, Y_LABEL_INDEX)
 fig, ax = plt.subplots(figsize=FIG_SIZE)
-bottom_offset = day_averages
-ax.bar(y_labels,
-       day_maximums,
-       BAR_WIDTH,
-       label=WIND_GUST_TITLE,
-       bottom=bottom_offset)
+ax.bar(
+    y_labels,
+    day_maximums,
+    BAR_WIDTH,
+    label=WIND_GUST_TITLE,
+)
 ax.bar(
     y_labels,
     day_averages,
