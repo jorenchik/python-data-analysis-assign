@@ -162,6 +162,3 @@ cython_debug/
 # Office app files 
 *.~lock.*
 *.docx
-
-# Exported files
-*.png
