@@ -21,7 +21,7 @@ BAR_WIDTH = 0.8
 PX = 1 / plt.rcParams['figure.dpi']
 FIG_SIZE = (1200 * PX, 1200 * PX)
 
-# Showing or saving mode
+# Showing or saving mode with CLI arguments
 parser = argparse.ArgumentParser(
     prog='first_exercise',
     description='Makes a double bar chart from xlsx files',
@@ -66,6 +66,7 @@ data_arrays = {
     key: data_utils.array_from_sheet(val, X_LABEL_INDEX, Y_LABEL_INDEX)
     for key, val in spreadsheets.items()
 }
+# The data that gets shown on the chart
 day_averages = np.array(
     [np.average(arr) for arr in data_arrays[AVERAGE_SPEED_TITLE]])
 day_maximums = np.array([np.max(arr) for arr in data_arrays[WIND_GUST_TITLE]])
@@ -88,6 +89,7 @@ ax.bar(
     label=AVERAGE_SPEED_TITLE,
 )
 
+# Chart supporting visuals
 ax.legend(loc="upper right")
 plt.xlabel(X_LABEL)
 plt.ylabel(Y_LABEL)
