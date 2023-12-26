@@ -119,7 +119,6 @@ bplot = ax.boxplot(season_daily_averages,
                    vert=True,
                    patch_artist=True,
                    labels=labels)
-ax.legend(loc="upper right")
 plt.ylabel(Y_LABEL)
 plt.title(CHART_TITLE)
 if SAVE_FILE:
