@@ -30,10 +30,16 @@ parser.add_argument(
     help="Option for showing the resulting chart",
 )
 parser.add_argument(
+    "--run",
+    action=argparse.BooleanOptionalAction,
+    help="Run the program without showing anything",
+)
+parser.add_argument(
     "--save",
     help="Option for saving the chart in the specified path",
 )
 args = parser.parse_args()
+RUN = args.run
 SAVE_FILE = True if args.save else False
 SAVE_FILENAME = args.save
 if SAVE_FILENAME:
@@ -41,7 +47,7 @@ if SAVE_FILENAME:
 else:
     SAVE_FILEPATH = None
 SHOW_CHART = True if args.show else False
-if not SAVE_FILE and not SHOW_CHART:
+if not SAVE_FILE and not SHOW_CHART and not RUN:
     parser.print_help()
     exit(0)
 
