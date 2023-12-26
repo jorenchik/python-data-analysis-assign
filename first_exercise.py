@@ -2,6 +2,7 @@ import numpy as np
 import pathlib
 import matplotlib.pyplot as plt
 import data_utils
+import argparse
 
 # Data related
 DATA_PATH = pathlib.Path("./data")
@@ -14,11 +15,35 @@ X_LABEL_INDEX = 0
 Y_LABEL_INDEX = 0
 
 # Matplotlib configuration
-CHART_FILENAME = "first_exercise.png"
-CHART_SAVE_PATH = pathlib.Path(CHART_FILENAME)
 BAR_WIDTH = 0.8
 PX = 1 / plt.rcParams['figure.dpi']
 FIG_SIZE = (1200 * PX, 1200 * PX)
+
+# Showing or saving mode
+parser = argparse.ArgumentParser(
+    prog='first_exercise',
+    description='Makes a double bar chart from xlsx files',
+)
+parser.add_argument(
+    "--show",
+    action=argparse.BooleanOptionalAction,
+    help="Option for showing the resulting chart",
+)
+parser.add_argument(
+    "--save",
+    help="Option for saving the chart in the specified path",
+)
+args = parser.parse_args()
+SAVE_FILE = True if args.save else False
+SAVE_FILENAME = args.save
+if SAVE_FILENAME:
+    SAVE_FILEPATH = pathlib.Path(SAVE_FILENAME)
+else:
+    SAVE_FILEPATH = None
+SHOW_CHART = True if args.show else False
+if not SAVE_FILE and not SHOW_CHART:
+    parser.print_help()
+    exit(0)
 
 # This is where the ax labels are set
 spreadsheet_files = {
@@ -54,4 +79,7 @@ plt.xlabel(X_LABEL)
 plt.ylabel(Y_LABEL)
 plt.title(CHART_TITLE)
 plt.xticks(rotation=60, ha="right")
-plt.savefig(fname=CHART_SAVE_PATH)
+if SAVE_FILE:
+    plt.savefig(fname=SAVE_FILEPATH)
+if SHOW_CHART:
+    plt.show()
