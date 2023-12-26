@@ -3,6 +3,7 @@ import pathlib
 import matplotlib.pyplot as plt
 import data_utils
 import re
+import argparse
 from enum import Enum
 
 # Data related
@@ -34,13 +35,43 @@ MONTHS_TO_SEASONS = {
 }
 
 # Matplotlib configuration
-CHART_FILENAME = "second_exercise.png"
-CHART_SAVE_PATH = pathlib.Path(CHART_FILENAME)
 # BAR_WIDTH = 0.8
 PX = 1 / plt.rcParams['figure.dpi']
 FIG_SIZE = (1200 * PX, 1200 * PX)
 MAXIMUM_DAYS_IN_A_MONTH = 31
 MONTHS_PER_SEASON = 3
+
+# Showing or saving mode with CLI arguments
+parser = argparse.ArgumentParser(
+    prog='first_exercise',
+    description='Makes a box plot from xlsx file',
+)
+parser.add_argument(
+    "--show",
+    action=argparse.BooleanOptionalAction,
+    help="Option for showing the resulting chart",
+)
+parser.add_argument(
+    "--run",
+    action=argparse.BooleanOptionalAction,
+    help="Run the program without showing anything",
+)
+parser.add_argument(
+    "--save",
+    help="Option for saving the chart in the specified path",
+)
+args = parser.parse_args()
+RUN = args.run
+SAVE_FILE = True if args.save else False
+SAVE_FILENAME = args.save
+if SAVE_FILENAME:
+    SAVE_FILEPATH = pathlib.Path(SAVE_FILENAME)
+else:
+    SAVE_FILEPATH = None
+SHOW_CHART = True if args.show else False
+if not SAVE_FILE and not SHOW_CHART and not RUN:
+    parser.print_help()
+    exit(0)
 
 
 def get_index_of_first_less_or_equal(n, list_):
@@ -86,9 +117,12 @@ bplot1 = ax.boxplot(season_daily_averages,
                     vert=True,
                     patch_artist=True,
                     labels=labels)
+
 ax.legend(loc="upper right")
 plt.ylabel(Y_LABEL)
 plt.title(CHART_TITLE)
 plt.xticks(rotation=60, ha="right")
-plt.show()
-# plt.savefig(fname=chart_save_path)
+if SAVE_FILE:
+    plt.savefig(fname=SAVE_FILEPATH)
+if SHOW_CHART:
+    plt.show()
